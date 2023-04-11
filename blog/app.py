@@ -1,17 +1,20 @@
+import os
 from flask import Flask
 from blog import commands
 from blog.extensions import db, login_manager
 from blog.models import User
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
+cfg_name = os.environ.get("CONFIG_NAME") or "DevConfig"
+app.config.from_object(f"blog.configs.{cfg_name}")
+migrate = Migrate(app, db, compare_type=True)
 
 
 def create_app() -> Flask:
-    app = Flask(__name__)
-    app.config["DEBUG"] = True
-    app.config["SECRET_KEY"] = "!$kh8$cz-z9q4@_430j_23-kw=y9*!#3v76vc!mp9c1*f)j+4z"
-    app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///db.sqlite"
-
-
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
