@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from blog import commands
-from blog.extensions import db, login_manager
+from blog.extensions import db, login_manager, csrf
 from blog.models import User
 from flask_migrate import Migrate
 
@@ -12,6 +12,7 @@ db.init_app(app)
 cfg_name = os.environ.get("CONFIG_NAME") or "DevConfig"
 app.config.from_object(f"blog.configs.{cfg_name}")
 migrate = Migrate(app, db, compare_type=True)
+csrf.init_app(app)
 
 
 def create_app() -> Flask:
@@ -41,5 +42,4 @@ def register_blueprints(app: Flask):
 
 
 def register_commands(app: Flask):
-    app.cli.add_command(commands.init_db)
     app.cli.add_command(commands.create_init_user)
